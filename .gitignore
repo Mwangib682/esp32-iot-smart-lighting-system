@@ -1,0 +1,5 @@
+*.local.h
+secrets.yaml
+.env
+*.log
+.vscode/
