@@ -1,0 +1,36 @@
+alias: ESP32 Combined Sound and Motion Lighting
+description: Motion OR sound activation; turn off 30 seconds after both clear
+mode: restart
+triggers:
+  - trigger: state
+    entity_id:
+      - binary_sensor.esp32_room_monitor_room_motion
+      - binary_sensor.esp32_room_monitor_room_sound
+  - trigger: homeassistant
+    event: start
+conditions: []
+actions:
+  - condition: template
+    value_template: >
+      {{ states('binary_sensor.esp32_room_monitor_room_motion') in ['on','off']
+         and states('binary_sensor.esp32_room_monitor_room_sound') in ['on','off'] }}
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ is_state('binary_sensor.esp32_room_monitor_room_motion','on')
+                 or is_state('binary_sensor.esp32_room_monitor_room_sound','on') }}
+        sequence:
+          - action: switch.turn_on
+            target:
+              entity_id: switch.brianiot
+    default:
+      - delay:
+          seconds: 30
+      - condition: template
+        value_template: >
+          {{ is_state('binary_sensor.esp32_room_monitor_room_motion','off')
+             and is_state('binary_sensor.esp32_room_monitor_room_sound','off') }}
+      - action: switch.turn_off
+        target:
+          entity_id: switch.brianiot
